@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ghanny — Network & Linux System Engineer</title>
+
+  <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap)" rel="stylesheet">
+
+  <style>
+    :root {
+      /* PRD palette */
+      --primary: #FF8C42;
+      --secondary: #2D3748;
+      --accent: #4A90E2;
+      --background: #0a0f1e; /* tetap dark theme modern */
+      --background-2: #0f172a;
+      --card: rgba(15,23,42,0.85);
+
+      --blue: var(--accent);
+      --blue-bright: #6fb0ff;
+      --blue-dim: #1d4ed8;
+      --cyan: #06b6d4;
+
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --text-muted: #475569;
+
+      --border: rgba(59,130,246,0.18);
+      --glow: rgba(59,130,246,0.12);
+
+      --mono: 'Space Mono', monospace;
+      --sans: 'Outfit', sans-serif;
+    }
+
+    /* Light mode tokens */
+    :root.light {
+      --background: #ffffff;
+      --background-2: #f7fafc;
+      --card: #ffffff;
+      --text: #1a202c;
+      --text-dim: #4a5568;
+      --text-muted: #718096;
+      --border: rgba(45,55,72,0.18);
+      --blue: var(--accent);
+      --blue-bright: #2f7be0;
+      --blue-dim: #2f5fb5;
+      --glow: rgba(74,144,226,0.10);
+    }
+
+    *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--background);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--background); }
+    ::-webkit-scrollbar-thumb { background: var(--blue-dim); border-radius: 2px; }
+
+    /* Subtle grid bg */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    :root.light body::before {
+      background-image:
+        linear-gradient(rgba(74,144,226,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,144,226,0.06) 1px, transparent 1px);
+    }
+
+    /* Navbar */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.0rem 5vw;
+      background: rgba(10,15,30,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    :root.light nav { background: rgba(255,255,255,0.8); }
+    .nav-left { display: flex; align-items: center; gap: 1rem; }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--blue);
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+    .nav-links {
+      display: flex; gap: 1.4rem; list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--text-dim); text-decoration: none;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      transition: color 0.2s; position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -3px; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--primary), transparent);
+      transform: scaleX(0); transition: transform 0.2s;
+    }
+    .nav-links a:hover { color: var(--blue-bright); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    .theme-toggle {
+      display: inline-flex; align-items: center; gap: .5rem;
+      border: 1px solid var(--border); color: var(--text);
+      background: transparent; padding: .45rem .8rem; border-radius: 999px;
+      font-size: .8rem; cursor: pointer;
+    }
+
+    /* Section */
+    section {
+      position: relative; z-index: 1;
+      padding: 6rem 5vw; max-width: 1100px; margin: 0 auto;
+    }
+    .section-label {
+      font-family: var(--mono); font-size: 0.72rem; color: var(--blue);
+      letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .section-label::before { content: '//'; opacity: 0.6; }
+    .section-title {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 800; color: var(--text); line-height: 1.2; margin-bottom: 1rem;
+    }
+    .divider { width: 64px; height: 3px; background: linear-gradient(90deg, var(--primary), transparent); margin-bottom: 2.2rem; border-radius: 2px; }
+
+    /* Hero */
+    #hero {
+      min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+      max-width: none; padding: 7rem 5vw 4rem; position: relative; overflow: hidden;
+    }
+    .hero-glow, .hero-glow2 {
+      position: absolute; pointer-events: none; animation: pulse 7s ease-in-out infinite;
+    }
+    .hero-glow {
+      top: 8%; left: -8%; width: 720px; height: 720px;
+      background: radial-gradient(circle, rgba(255,140,66,0.15) 0%, transparent 65%);
+    }
+    .hero-glow2 {
+      bottom: -10%; right: -6%; width: 520px; height: 520px; animation-direction: reverse;
+      background: radial-gradient(circle, rgba(74,144,226,0.10) 0%, transparent 65%);
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:.7} }
+
+    .hero-inner { max-width: 1100px; margin: 0 auto; width: 100%; position: relative; z-index: 2; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--mono); font-size: 0.72rem; color: #fff;
+      background: var(--primary); border: 1px solid rgba(255,140,66,0.4);
+      padding: 0.35rem 0.9rem; border-radius: 100px; margin-bottom: 1.4rem;
+      box-shadow: 0 0 24px rgba(255,140,66,0.35);
+    }
+    .hero-name {
+      font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 900; line-height: 1.05; letter-spacing: -0.02em;
+    }
+    .hero-name .accent { color: var(--primary); }
+    .hero-sub {
+      font-family: var(--mono); font-size: clamp(0.9rem,1.6vw,1.05rem); color: var(--cyan);
+      margin: .8rem 0 1.2rem;
+    }
+    .hero-desc {
+      font-size: 1.05rem; color: var(--text-dim); max-width: 620px; line-height: 1.85;
+    }
+    .hero-btns { display: flex; gap: 0.9rem; margin-top: 2rem; flex-wrap: wrap; }
+    .btn-primary, .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.6rem;
+      font-family: var(--sans); font-weight: 700; font-size: 0.9rem; text-decoration: none; border-radius: 10px;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary); color: #0b0b0b; box-shadow: 0 0 20px rgba(255,140,66,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 32px rgba(255,140,66,0.55); }
+    .btn-secondary {
+      background: transparent; color: var(--text); border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--blue); color: var(--blue-bright); transform: translateY(-2px); }
+
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0.9rem;
+      margin-top: 1.6rem; max-width: 620px;
+    }
+    .hstat {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem;
+      text-align: center;
+    }
+    .hstat .num { font-family: var(--mono); font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+    .hstat .lbl { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    .scroll-indicator { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: .4rem; }
+    .scroll-indicator span { font-family: var(--mono); font-size: .62rem; color: var(--text-muted); letter-spacing: .15em; text-transform: uppercase; }
+    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--primary), transparent); animation: scrollDown 1.6s ease-in-out infinite; }
+    @keyframes scrollDown { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 51%{transform:scaleY(1);transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+
+    /* About */
+    #about .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+    }
+    .about-text p { color: var(--text-dim); font-size: 1rem; line-height: 1.9; margin-bottom: 1rem; }
+    .about-stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem; margin-top: 1.2rem; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem; text-align: center;
+    }
+    .stat-card .num { font-family: var(--mono); font-size: 1.5rem; font-weight: 800; color: var(--blue); }
+    .stat-card .lbl { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    .terminal {
+      background: #020817; border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+      font-family: var(--mono); font-size: 0.82rem; box-shadow: 0 0 40px var(--glow);
+    }
+    :root.light .terminal { background: #0f162a; }
+    .terminal-bar { background: #0d1526; padding: 0.7rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border); }
+    .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .t-dot.r { background: #ef4444; } .t-dot.y { background: #f59e0b; } .t-dot.g { background: #22c55e; }
+    .terminal-title { font-size: 0.7rem; color: var(--text-dim); margin-left: auto; margin-right: auto; }
+    .terminal-body { padding: 1.2rem; line-height: 2.0; }
+    .t-prompt { color: var(--blue); } .t-cmd { color: var(--cyan); } .t-out { color: #64748b; } .t-val { color: #86efac; }
+
+    /* Skills */
+    .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+    .skill-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem;
+      transition: border-color .25s, transform .25s, box-shadow .25s; position: relative; overflow: hidden;
+    }
+    .skill-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--blue), transparent); opacity: 0; transition: opacity .25s;
+    }
+    .skill-card:hover { border-color: rgba(59,130,246,0.4); transform: translateY(-4px); box-shadow: 0 8px 32px var(--glow); }
+    .skill-card:hover::before { opacity: 1; }
+    .skill-card h3 { font-size: .95rem; font-weight: 800; color: var(--blue-bright); margin-bottom: .8rem; font-family: var(--mono); }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .skill-tag {
+      font-size: .72rem; color: var(--text-dim); background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.14);
+      padding: .2rem .6rem; border-radius: 6px; font-family: var(--mono);
+    }
+
+    /* Tools */
+    .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .tool-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem;
+      display: flex; flex-direction: column; align-items: center; gap: .5rem; text-align: center;
+      transition: transform .2s, border-color .2s;
+    }
+    .tool-card:hover { transform: translateY(-3px); border-color: var(--blue); }
+    .tool-ico {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,140,66,0.12); color: var(--primary); font-weight: 800;
+      border: 1px solid rgba(255,140,66,0.35);
+    }
+    .tool-name { font-size: .85rem; font-weight: 700; color: var(--text); }
+    .tool-cat { font-size: .7rem; color: var(--text-muted); }
+
+    /* Projects */
+    .projects-list { display: grid; gap: 1.2rem; }
+    .project-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.6rem 1.8rem;
+      display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start; position: relative; overflow: hidden;
+      transition: border-color .25s, box-shadow .25s;
+    }
+    .project-card::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at top left, rgba(59,130,246,0.05), transparent 60%);
+      pointer-events: none;
+    }
+    .project-card.highlight {
+      border-color: rgba(59,130,246,0.35);
+      background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(6,182,212,0.04));
+    }
+    .project-number { font-family: var(--mono); font-size: .65rem; color: var(--text-muted); letter-spacing: .1em; margin-bottom: .4rem; }
+    .project-title { font-size: 1.08rem; font-weight: 800; color: var(--text); margin-bottom: .5rem; }
+    .project-desc { font-size: .92rem; color: var(--text-dim); line-height: 1.75; }
+    .project-link {
+      font-family: var(--mono); font-size: .75rem; color: var(--blue);
+      text-decoration: none; display: inline-flex; align-items: center; gap: .3rem; margin-top: .7rem;
+    }
+    .project-link:hover { color: var(--blue-bright); }
+    .project-meta { display: flex; flex-direction: column; gap: .5rem; align-items: flex-end; }
+    .project-badge {
+      font-family: var(--mono); font-size: .65rem; color: var(--blue);
+      background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+      padding: .25rem .7rem; border-radius: 999px; white-space: nowrap;
+    }
+    .project-features { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+    .feat-chip {
+      font-size: .68rem; color: var(--cyan); background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.18);
+      padding: .15rem .55rem; border-radius: 5px; font-family: var(--mono);
+    }
+
+    /* Experience */
+    .exp-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.6rem;
+      display: grid; grid-template-columns: auto 1fr; gap: 1.2rem; align-items: start;
+    }
+    .exp-icon {
+      width: 48px; height: 48px; background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.2); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;
+    }
+    .exp-role { font-size: 1rem; font-weight: 800; color: var(--text); }
+    .exp-place { font-family: var(--mono); font-size: .78rem; color: var(--blue); margin: .2rem 0 .6rem; }
+    .exp-desc { font-size: .9rem; color: var(--text-dim); line-height: 1.8; }
+
+    /* Info cards (Certificates) */
+    .info-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; }
+    .info-card h3 { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: .4rem; }
+    .info-card p { font-size: .9rem; color: var(--text-dim); line-height: 1.75; }
+    .cert-badge {
+      display: inline-flex; align-items: center; gap: .5rem; margin-top: .7rem; font-family: var(--mono);
+      font-size: .72rem; color: #fbbf24; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);
+      padding: .3rem .8rem; border-radius: 8px;
+    }
+
+    /* Contact */
+    .contact-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .contact-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem;
+      display: flex; align-items: center; gap: 1rem; text-decoration: none;
+      transition: border-color .2s, transform .2s;
+    }
+    .contact-card:hover { border-color: var(--blue); transform: translateY(-3px); }
+    .contact-icon {
+      width: 44px; height: 44px; background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .contact-lbl { font-family: var(--mono); font-size: .65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; }
+    .contact-val { font-size: .95rem; font-weight: 700; color: var(--text); margin-top: .1rem; }
+
+    /* Separator */
+    .sep {
+      width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent);
+      max-width: 1100px; margin: 0 auto; position: relative; z-index: 1;
+    }
+
+    /* Reveal */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* Footer */
+    footer {
+      position: relative; z-index: 1; text-align: center; padding: 2rem; border-top: 1px solid var(--border);
+      font-family: var(--mono); font-size: .72rem; color: var(--text-muted);
+    }
+    footer span { color: var(--blue); }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      .tools-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      nav { padding: .9rem 4vw; }
+      .nav-links { display: none; }
+      #hero { padding: 7rem 5vw 4rem; }
+      #about .about-grid, .skills-grid, .contact-grid { grid-template-columns: 1fr; }
+      .tools-grid { grid-template-columns: 1fr 1fr; }
+      .project-card { grid-template-columns: 1fr; }
+      .project-meta { align-items: flex-start; }
+      .exp-card { grid-template-columns: 1fr; }
+      .exp-icon { display: none; }
+      .hero-stats { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    @media (max-width: 460px) {
+      .hero-stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav>
+    <div class="nav-left">
+      <div class="nav-logo">ghanny@portfolio:~$</div>
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle Theme">
+        <span id="themeLabel">Dark</span>
+      </button>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#certs">Certificates</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-glow2"></div>
+
+    <div class="hero-inner">
+      <!-- <div class="hero-badge"><span class="dot"></span> Available for opportunities</div> -->
+      <h1 class="hero-name">Hi, I'm <span class="accent">Ghanny</span></h1>
+      <p class="hero-sub">Fresh Graduate TKJ | Network & Linux System Enthusiast</p>
+      <p class="hero-desc">
+        Building, learning, and growing through technology. Fokus pada infrastruktur jaringan,
+        Linux server, dan web services — dari desain hingga implementasi. Portofolio ini dibuat
+        sebagai media personal branding dan lampiran melamar kerja, serta fondasi untuk versi berikutnya (v2.0 Laravel).
+      </p>
+      <div class="hero-btns">
+        <a href="#projects" class="btn-primary">↗ View Projects</a>
+        <a href="assets/documents/CV_Teknisi_Jaringan_Wifi_Ghanny_Abdul_Aziz_Bastaman.pdf" class="btn-secondary" download>⬇ Download CV</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hstat">
+          <div class="num">7000+</div>
+          <div class="lbl">Records Processed</div>
+        </div>
+        <div class="hstat">
+          <div class="num">3</div>
+          <div class="lbl">Months Internship</div>
+        </div>
+        <div class="hstat">
+          <div class="num">5+</div>
+          <div class="lbl">Projects</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>scroll</span>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-label">About Me</div>
+    <h2 class="section-title">Who I Am</h2>
+    <div class="divider"></div>
+
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p>Saya adalah lulusan SMK Jurusan Teknik Komputer dan Jaringan (TKJ) yang tertarik pada teknologi, khususnya jaringan dan sistem berbasis Linux. Saya senang membangun solusi digital dari perencanaan hingga implementasi.</p>
+        <p>Berpengalaman dalam konfigurasi routing, VLAN, deployment web server/DNS, serta validasi data. Terbiasa melakukan simulasi jaringan sebelum implementasi dan memahami dasar keamanan jaringan serta monitoring sistem.</p>
+        <p>Saat ini aktif belajar web development dasar (HTML, CSS, JavaScript) untuk kebutuhan layanan web sederhana dan portal internal.</p>
+
+        <div class="about-stats">
+          <div class="stat-card">
+            <div class="num">TKJ</div>
+            <div class="lbl">Fresh Graduate</div>
+          </div>
+          <div class="stat-card">
+            <div class="num">1</div>
+            <div class="lbl">PKL Experience</div>
+          </div>
+          <div class="stat-card">
+            <div class="num">3+</div>
+            <div class="lbl">Projects Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="num">2026</div>
+            <div class="lbl">Active Learner</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+          <span class="terminal-title">ghanny@server:~</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">ghanny@server</span>:<span class="t-cmd">~$</span> whoami</div>
+          <div class="t-val">ghanny_abdulaziz</div>
+          <br>
+          <div><span class="t-prompt">ghanny@server</span>:<span class="t-cmd">~$</span> cat info.txt</div>
+          <div class="t-out">Role    : <span class="t-val">Network & Sysadmin</span></div>
+          <div class="t-out">OS      : <span class="t-val">Debian 12 (Bookworm)</span></div>
+          <div class="t-out">Domain  : <span class="t-val">ghanny.online</span></div>
+          <div class="t-out">Stack   : <span class="t-val">Apache2 · Bind9 · Cacti</span></div>
+          <br>
+          <div><span class="t-prompt">ghanny@server</span>:<span class="t-cmd">~$</span> uptime</div>
+          <div class="t-val">system running ... always learning</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="section-label">Skills</div>
+    <h2 class="section-title">Technical Expertise</h2>
+    <div class="divider"></div>
+
+    <div class="skills-grid">
+      <div class="skill-card reveal">
+        <h3>Networking</h3>
+        <div class="skill-tags">
+          <span class="skill-tag">TCP/IP</span>
+          <span class="skill-tag">LAN Setup</span>
+          <span class="skill-tag">Basic Routing</span>
+          <span class="skill-tag">Mikrotik</span>
+          <span class="skill-tag">VLAN</span>
+          <span class="skill-tag">Basic Firewall</span>
+        </div>
+      </div>
+
+      <!-- <div class="skill-card reveal" style="transition-delay:0.1s">
+        <h3>Web Development</h3>
+        <div class="skill-tags">
+          <span class="skill-tag">HTML5</span>
+          <span class="skill-tag">CSS3</span>
+          <span class="skill-tag">JavaScript</span>
+          <span class="skill-tag">Responsive Design</span>
+        </div>
+      </div> -->
+
+      <div class="skill-card reveal" style="transition-delay:0.2s">
+        <h3>Data & Office</h3>
+        <div class="skill-tags">
+          <span class="skill-tag">Excel</span>
+          <span class="skill-tag">Word</span>
+          <span class="skill-tag">Data Entry</span>
+          <span class="skill-tag">Data Validation</span>
+        </div>
+      </div>
+
+      <div class="skill-card reveal" style="transition-delay:0.3s">
+        <h3>Soft Skills</h3>
+        <div class="skill-tags">
+          <span class="skill-tag">Teamwork</span>
+          <span class="skill-tag">Problem Solving</span>
+          <span class="skill-tag">Communication</span>
+          <span class="skill-tag">Adaptability</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- TOOLS -->
+  <section id="tools">
+    <div class="section-label">Tools</div>
+    <h2 class="section-title">Tooling I Use</h2>
+    <div class="divider"></div>
+
+    <div class="tools-grid reveal">
+      <!-- Development -->
+      <div class="tool-card">
+        <div class="tool-ico">V</div>
+        <div class="tool-name">VS Code</div>
+        <div class="tool-cat">Development</div>
+      </div>
+      <!-- <div class="tool-card">
+        <div class="tool-ico">G</div>
+        <div class="tool-name">Git</div>
+        <div class="tool-cat">Development</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-ico">GH</div>
+        <div class="tool-name">GitHub</div>
+        <div class="tool-cat">Development</div>
+      </div> -->
+
+      <!-- Networking -->
+      <div class="tool-card">
+        <div class="tool-ico">W</div>
+        <div class="tool-name">Winbox</div>
+        <div class="tool-cat">Networking</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-ico">PT</div>
+        <div class="tool-name">Cisco Packet Tracer</div>
+        <div class="tool-cat">Networking</div>
+      </div>
+
+      <!-- Productivity -->
+      <div class="tool-card">
+        <div class="tool-ico">W</div>
+        <div class="tool-name">Microsoft Word</div>
+        <div class="tool-cat">Productivity</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-ico">X</div>
+        <div class="tool-name">Microsoft Excel</div>
+        <div class="tool-cat">Productivity</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-ico">C</div>
+        <div class="tool-name">Canva</div>
+        <div class="tool-cat">Productivity</div>
+      </div>
+
+      <!-- Embedded / IoT -->
+      <div class="tool-card">
+        <div class="tool-ico">A</div>
+        <div class="tool-name">Arduino IDE</div>
+        <div class="tool-cat">Embedded / IoT</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-ico">E</div>
+        <div class="tool-name">ESP32</div>
+        <div class="tool-cat">Embedded / IoT</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-label">Projects</div>
+    <h2 class="section-title">Projek yang Pernah Dikerjakan</h2>
+    <div class="divider"></div>
+
+    <div class="projects-list">
+      <div class="project-card reveal">
+        <div>
+          <div class="project-number">01 / Project</div>
+          <div class="project-title">Portfolio Website</div>
+          <div class="project-desc">
+            Website portofolio statis dengan HTML, CSS, dan JavaScript. Dirancang sebagai
+            digital resume dashboard yang modern, bersih, dan mudah dibaca.
+          </div>
+          <div class="project-features">
+            <span class="feat-chip">Responsive</span>
+            <span class="feat-chip">Smooth Scroll</span>
+            <span class="feat-chip">Dark Mode</span>
+          </div>
+          <!-- <a href="https://web.ghanny.online" target="_blank" class="project-link">↗ Website</a> -->
+          <!-- <a href="[username.github.io](https://USERNAME.github.io/portfolio-v1.1)" target="_blank" class="project-link">↗ Live Demo</a> -->
+        </div>
+        <div class="project-meta">
+          <span class="project-badge">HTML · CSS · JS</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div>
+          <div class="project-number">02 / Project</div>
+          <div class="project-title">ESP32 Web Server</div>
+          <div class="project-desc">
+            Web server sederhana pada ESP32 untuk menampilkan status sensor dan kontrol
+            dasar. Frontend HTML/CSS minimal, komunikasi berbasis HTTP.
+          </div>
+          <div class="project-features">
+            <span class="feat-chip">ESP32</span>
+            <span class="feat-chip">Arduino</span>
+            <span class="feat-chip">HTTP</span>
+          </div>
+          <!-- Ganti sesuai link -->
+          <!-- <a href="#" target="_blank" class="project-link">↗ GitHub Repo</a> -->
+        </div>
+        <div class="project-meta">
+          <span class="project-badge">ESP32 · Arduino</span>
+        </div>
+      </div>
+
+      <div class="project-card highlight reveal">
+        <div>
+          <div class="project-number">03 / Featured</div>
+          <div class="project-title">UKK Project</div>
+          <div class="project-desc">
+            Konfigurasi & backup VLAN, routing untuk koneksi internet, serta instalasi
+            dan konfigurasi server Debian 12: Apache2 (web), Bind9 (DNS), dan Cacti (monitoring).
+            Menerapkan firewall dasar untuk meningkatkan keamanan.
+          </div>
+          <div class="project-features">
+            <span class="feat-chip">Network Config</span>
+            <span class="feat-chip">VLAN Config</span>
+            <span class="feat-chip">Apache2</span>
+            <span class="feat-chip">Bind9</span>
+            <span class="feat-chip">Cacti</span>
+            <span class="feat-chip">Firewall</span>
+          </div>
+        </div>
+        <div class="project-meta">
+          <span class="project-badge">Debian 12</span>
+          <span class="project-badge">Network</span>
+          <span class="project-badge">Basic Firewall</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div>
+          <div class="project-number">04 / Project</div>
+          <div class="project-title">Home Server</div>
+          <div class="project-desc">
+            Server pribadi berbasis Linux untuk NAS dan web server. Pernah menggunakan VPS untuk
+            deployment website serta konfigurasi Apache2 dan domain.
+          </div>
+          <div class="project-features">
+            <span class="feat-chip">Hosting Web</span>
+            <span class="feat-chip">DNS</span>
+            <span class="feat-chip">Monitoring</span>
+          </div>
+          <a href="https://web.ghanny.online" target="_blank" class="project-link">↗ web.ghanny.online</a>
+        </div>
+        <div class="project-meta">
+          <span class="project-badge">Linux · Apache2</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div>
+          <div class="project-number">05 / Project</div>
+          <div class="project-title">Network Lab Simulation</div>
+          <div class="project-desc">
+            Perancangan dan simulasi topologi jaringan menggunakan GNS3 dan Cisco Packet
+            Tracer sebagai pre-implementation untuk memastikan efisiensi dan stabilitas.
+          </div>
+          <div class="project-features">
+            <span class="feat-chip">Topology Design</span>
+            <span class="feat-chip">Pre-implementation</span>
+          </div>
+        </div>
+        <div class="project-meta">
+          <span class="project-badge">GNS3</span>
+          <span class="project-badge">Packet Tracer</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="section-label">Experience</div>
+    <h2 class="section-title">Work History</h2>
+    <div class="divider"></div>
+
+    <div class="exp-card reveal">
+      <div class="exp-icon">🏢</div>
+      <div>
+        <div class="exp-role">System & Web Administrator — Praktik Kerja Lapangan (PKL)</div>
+        <div class="exp-place">Kantor Desa Mekarwangi • Durasi: 3 Months</div>
+        <div class="exp-desc">
+          - Input 7000+ data penduduk dan validasi data menggunakan OpenSID.<br/>
+          - Administrasi digital dan dukungan layanan masyarakat.<br/>
+          - Kolaborasi tim untuk memastikan sistem berjalan baik.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- CERTIFICATES -->
+  <section id="certs">
+    <div class="section-label">Certificates</div>
+    <h2 class="section-title">Sertifikasi</h2>
+    <div class="divider"></div>
+
+    <div class="two-col reveal" style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+      <div class="info-card">
+        <h3>Coming Soon....</h3>
+        <div class="cert-badge">Planned · Networking / Linux / Web</div>
+      </div>
+      <!-- <div class="info-card">
+        <h3>Dokumen Pendukung</h3>
+        <p>Jika sudah tersedia, unggah sertifikat ke assets/documents lalu tautkan di sini.</p>
+      </div>
+    </div>
+  </section> -->
+
+  <div class="sep"></div>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-label">Contact</div>
+    <h2 class="section-title">Let's Connect</h2>
+    <div class="divider"></div>
+
+    <div class="contact-grid reveal">
+      <a href="mailto:ghannyabdulaziz@gmail.com" class="contact-card">
+        <div class="contact-icon">✉</div>
+        <div>
+          <div class="contact-lbl">Email</div>
+          <div class="contact-val">ghannyabdulaziz@gmail.com</div>
+        </div>
+      </a>
+
+      <a href="https://github.com/nath35497" target="_blank" class="contact-card">
+        <div class="contact-icon"></div>
+        <div>
+          <div class="contact-lbl">GitHub</div>
+          <div class="contact-val">github.com/nath35497</div>
+        </div>
+      </a>
+
+      <a href="https://www.linkedin.com/in/ghanny-abdul-aziz-bastaman-03792635b?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" class="contact-card">
+        <div class="contact-icon">in</div>
+        <div>
+          <div class="contact-lbl">LinkedIn</div>
+          <div class="contact-val">linkedin.com/in/Ghanny Abdul Aziz Bastaman</div>
+        </div>
+      </a>
+
+      <a href="https://wa.me/6283142004410" target="_blank" class="contact-card">
+        <div class="contact-icon">☎</div>
+        <div>
+          <div class="contact-lbl">WhatsApp</div>
+          <div class="contact-val">+62 831-4200-4410</div>
+        </div>
+      </a>
+
+      <div class="contact-card" style="cursor:default">
+        <div class="contact-icon">⌖</div>
+        <div>
+          <div class="contact-lbl">Location</div>
+          <div class="contact-val">Bandung, West Java, Indonesia</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Form (placeholder v1.1 — belum berfungsi) -->
+    <div class="info-card" style="margin-top:1rem;">
+      <h3>Contact Form</h3>
+      <p>Form ini akan disediakan untuk versi berikutnya.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>Ghanny Abdul Aziz</span> · Network & Linux System Enthusiast · 2026
+  </footer>
+
+  <script>
+    // Theme toggle with localStorage
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const savedTheme = localStorage.getItem('theme'); // 'light' | 'dark'
+
+    function applyTheme(mode) {
+      if (mode === 'light') {
+        root.classList.add('light');
+        themeLabel.textContent = 'Light';
+      } else {
+        root.classList.remove('light');
+        themeLabel.textContent = 'Dark';
+      }
+    }
+    applyTheme(savedTheme || 'dark');
+
+    themeToggle.addEventListener('click', () => {
+      const isLight = root.classList.toggle('light');
+      const mode = isLight ? 'light' : 'dark';
+      localStorage.setItem('theme', mode);
+      applyTheme(mode);
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => io.observe(el));
+
+    // Nav active highlight on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    function setActive() {
+      let current = '';
+      sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+      navLinks.forEach(a => {
+        const active = a.getAttribute('href') === '#' + current;
+        a.style.color = active ? 'var(--blue-bright)' : '';
+      });
+    }
+    window.addEventListener('scroll', setActive, { passive: true });
+    window.addEventListener('load', setActive);
+
+    // Hero badge blinking dot
+    const badge = document.querySelector('.hero-badge');
+    if (badge) {
+      const dot = document.createElement('span');
+      // dot via CSS shadow; placeholder already present in markup
+    }
+  </script>
+</body>
+</html>
